@@ -1,0 +1,18 @@
+I am creating an app to help users prepare for the German B1 speaking exam.
+Please create a prompt for an image generation AI. 
+The image should be based on the topic: "$TOPIC".
+Include three specific and distinct elements that should appear in the image, chosen by you.
+The setting should be natural and culturally neutral, suitable for a German language learning exercise at B1 level.
+
+Please return a JSON in this format:
+{
+    "image": {
+        "description": "Your prompt for the image generation AI",
+        "topic": "$TOPIC",
+        "elements": [
+            "Element 1",
+            "Element 2",
+            "Element 3"
+        ]
+    }
+}
