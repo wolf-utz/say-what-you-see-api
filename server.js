@@ -35,17 +35,25 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Whitelist of allowed topics
+const allowedTopics = ["Supermarkt", "Schule", "Küche", "Park", "Bäckerei"];
+
 // Routes
 app.post("/api/generate-image", async (req, res) => {
   try {
-    // @fixme: topic should be a type in a allowed list of topics to prevent prompt injection attacks
-    const { topic } = req.body;
+    const { topicId } = req.body;
+    if (
+      typeof topicId !== "number" ||
+      !Number.isInteger(topicId) ||
+      topicId < 0 ||
+      topicId >= allowedTopics.length
+    ) {
+      return res.status(400).json({ error: "Missing or invalid topicId" });
+    }
+    const topic = allowedTopics[topicId];
 
     // Use a fake response in test environment to avoid consuming API credits
     if (process.env.NODE_ENV === "test") {
-      if (!topic || typeof topic !== "string" || topic.trim() === "") {
-        return res.status(400).json({ error: "Missing or invalid topic" });
-      }
       return res.status(200).json({
         image: "iVBORw0KGgoAAAANSUhEUgAAAAUA" + "A".repeat(120),
         topic,
