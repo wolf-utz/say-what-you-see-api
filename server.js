@@ -23,19 +23,43 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai;
+if (process.env.NODE_ENV !== "test") {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+// Whitelist of allowed topics
+const allowedTopics = ["Supermarkt", "Schule", "Küche", "Park", "Bäckerei"];
+
 // Routes
-app.get("/api/generate-image", async (req, res) => {
+app.post("/api/generate-image", async (req, res) => {
   try {
-    const topic = "Family";
+    const { topicId } = req.body;
+    if (
+      typeof topicId !== "number" ||
+      !Number.isInteger(topicId) ||
+      topicId < 0 ||
+      topicId >= allowedTopics.length
+    ) {
+      return res.status(400).json({ error: "Missing or invalid topicId" });
+    }
+    const topic = allowedTopics[topicId];
+
+    // Use a fake response in test environment to avoid consuming API credits
+    if (process.env.NODE_ENV === "test") {
+      return res.status(200).json({
+        image: "iVBORw0KGgoAAAANSUhEUgAAAAUA" + "A".repeat(120),
+        topic,
+        elements: ["Einkaufswagen", "Kasse", "Gemüseabteilung"],
+      });
+    }
 
     // Read the prompt template
     const promptTemplate = await fs.readFile(
@@ -92,7 +116,7 @@ app.get("/api/generate-image", async (req, res) => {
     result.image.base64 = base64Image;
 
     res.json({
-      // image: base64Image,
+      image: base64Image,
       topic: topic,
       elements: result.image.elements,
     });
@@ -102,7 +126,16 @@ app.get("/api/generate-image", async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
 });
+
+// Start the server
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
