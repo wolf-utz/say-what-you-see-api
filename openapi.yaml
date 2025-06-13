@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Say What You See API
+  version: 1.0.0
+  description: |
+    This API generates German learning images based on a given topic. It is designed to help clients create educational materials for language learning.
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://say-what-you-see-api.onrender.com
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development server (replace with production URL in deployment)
+paths:
+  /api/generate-image:
+    post:
+      operationId: generateImage
+      security: []
+      summary: Generate a German learning image based on a topic
+      description: |
+        Generates a comic-style image and a list of image elements for a given topic, designed for German language learning materials.
+
+        **Example curl:**
+        curl -X POST http://localhost:3000/api/generate-image \
+          -H "Content-Type: application/json" \
+          -d '{"topic": "im Supermarkt"}'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic:
+                  type: string
+                  description: The topic for the image (e.g., "Supermarkt").
+              required:
+                - topic
+            example:
+              topic: "im Supermarkt"
+      responses:
+        "200":
+          description: Successfully generated image and elements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topic:
+                    type: string
+                    description: The topic used for image generation
+                  elements:
+                    type: array
+                    description: List of image elements related to the topic
+                    items:
+                      type: string
+                  image:
+                    type: string
+                    description: Base64-encoded JPEG image
+              example:
+                topic: "im Supermarkt"
+                elements:
+                  - "Einkaufswagen"
+                  - "Kasse"
+                  - "Gemüseabteilung"
+                image: "<base64-encoded-image>"
+        "400":
+          description: Invalid request (missing or invalid topic)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Missing or invalid topic"
+        "500":
+          description: Failed to generate image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Failed to generate image"
+  /health:
+    get:
+      operationId: healthCheck
+      security: []
+      summary: Health check
+      description: |
+        Returns API health status.
+
+        **Example curl:**
+        curl http://localhost:3000/health
+
+        Possible errors: If the server is down or misconfigured, a 500 error may be returned.
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+              example:
+                status: ok
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Invalid request"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Internal server error"
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
