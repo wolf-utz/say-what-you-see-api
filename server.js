@@ -23,9 +23,12 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai;
+if (process.env.NODE_ENV !== "test") {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 const PORT = process.env.PORT || 3000;
 
 // Middleware
