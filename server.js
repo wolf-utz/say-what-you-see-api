@@ -95,10 +95,10 @@ app.post("/api/generate-image", async (req, res) => {
     form.append("output_format", "jpeg");
     form.append("aspect_ratio", "1:1");
     form.append("style_preset", "comic-book");
-    form.append("model", process.env.IMAGE_MODEL);
 
     const response = await fetch(
-      "https://api.stability.ai/v2beta/stable-image/generate/core",
+      "https://api.stability.ai/v2beta/stable-image/generate/" +
+        process.env.IMAGE_MODEL,
       {
         method: "POST",
         headers: {
